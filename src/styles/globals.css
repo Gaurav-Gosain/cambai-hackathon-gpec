@@ -31,3 +31,7 @@ body {
     text-wrap: balance;
   }
 }
+
+.grid-cols-custom {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
