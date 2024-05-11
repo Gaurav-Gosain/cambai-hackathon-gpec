@@ -5,7 +5,12 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { email,data } = JSON.parse(req.body);
+    const { email, data } = JSON.parse(req.body);
+    
+    const formData = new FormData();
+
+    formData.append("data", JSON.stringify(data));
+    formData.append("email", email);
 
   const options = {
     method: "POST",
@@ -15,7 +20,7 @@ export default async function handler(
     },
     body: JSON.stringify({
       email: email,
-      data: data,
+      data: formData,
     }),
   };
 
