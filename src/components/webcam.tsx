@@ -304,6 +304,13 @@ const Webcam = () => {
                     const respJson = await resp.json();
 
                     console.log(respJson);
+                    const finalresp = await fetch(`/api/send_email`, {
+                      method: "POST",
+                      body: JSON.stringify({
+                        email: email,
+                        data: JSON.stringify(respJson),
+                      }) as any,
+                    });
                     setLoading(false);
                   }}
                 >
