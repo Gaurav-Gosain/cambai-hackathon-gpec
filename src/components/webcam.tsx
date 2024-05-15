@@ -23,7 +23,9 @@ const Webcam = ({ user }: { user: AuthModel }) => {
     resumeRecording,
     startRecording,
     stopRecording,
-  } = useRecordWebcam();
+  } = useRecordWebcam({
+    mediaTrackConstraints: { video: true, audio: true } as any,
+  });
 
   const [videoDeviceId, setVideoDeviceId] = React.useState<string>("");
   const [audioDeviceId, setAudioDeviceId] = React.useState<string>("");
@@ -252,38 +254,38 @@ const Webcam = ({ user }: { user: AuthModel }) => {
 
                     // if everything is good, then upload the blob
 
-                    setLoading(true);
+                    // setLoading(true);
 
                     // -------------------------------------------
 
                     // Upload the blob to a back-end
-                    // const formData = new FormData();
-                    // formData.append(
-                    //   "original_video",
-                    //   finalRecording.blob as Blob,
-                    //   `${email}.webm`,
-                    // );
-                    // formData.append("user", user?.id);
-                    //
-                    // let res = await pb.collection("dubbing").create(formData);
-                    //
-                    // console.log(res);
-                    //
-                    // // generate a file token
-                    // const fileToken = await pb.files.getToken();
-                    //
-                    // console.log(
-                    //   pb.getFileUrl(res, res["original_video"], {
-                    //     token: fileToken,
-                    //   }),
-                    // );
-                    //
-                    // const records = await pb.collection("dubbing").getFullList({
-                    //   sort: "-created",
-                    //   expand: "user",
-                    // });
-                    //
-                    // console.log(records);
+                    const formData = new FormData();
+                    formData.append(
+                      "original_video",
+                      finalRecording.blob as Blob,
+                      `${email}.webm`,
+                    );
+                    formData.append("user", user?.id);
+
+                    let res = await pb.collection("dubbing").create(formData);
+
+                    console.log(res);
+
+                    // generate a file token
+                    const fileToken = await pb.files.getToken();
+
+                    console.log(
+                      pb.getFileUrl(res, res["original_video"], {
+                        token: fileToken,
+                      }),
+                    );
+
+                    const records = await pb.collection("dubbing").getFullList({
+                      sort: "-created",
+                      expand: "user",
+                    });
+
+                    console.log(records);
 
                     // -------------------------------------------
 
