@@ -2,8 +2,10 @@ import React, { useEffect } from "react";
 import { useRecordWebcam } from "react-record-webcam";
 import { Button } from "./button";
 import { Select } from "./select";
+import pb from "@/lib/pocketbase";
+import { AuthModel } from "pocketbase";
 
-const Webcam = () => {
+const Webcam = ({ user }: { user: AuthModel }) => {
   const {
     activeRecordings,
     cancelRecording,
@@ -14,7 +16,6 @@ const Webcam = () => {
     createRecording,
     devicesById,
     devicesByType,
-    download,
     errorMessage,
     muteRecording,
     openCamera,
@@ -55,6 +56,7 @@ const Webcam = () => {
   }, []);
 
   const handleSelect = async (event: any) => {
+    clearAllRecordings();
     const { deviceid: deviceId } =
       event.target.options[event.target.selectedIndex].dataset;
     if (devicesById?.[deviceId].type === "videoinput") {
@@ -63,6 +65,8 @@ const Webcam = () => {
     if (devicesById?.[deviceId].type === "audioinput") {
       setAudioDeviceId(deviceId);
     }
+    const recording = await createRecording(videoDeviceId, audioDeviceId);
+    if (recording) await openCamera(recording.id);
   };
 
   const quickDemo = async () => {
@@ -122,7 +126,9 @@ const Webcam = () => {
       </div>
       <div className="space-x-2">
         <Button onClick={quickDemo}>Record 30s video</Button>
-        <Button onClick={start}>Open camera</Button>
+        {activeRecordings.length == 0 && (
+          <Button onClick={start}>Open camera</Button>
+        )}
         <Button onClick={() => clearAllRecordings()}>Clear all</Button>
         <Button onClick={() => clearError()}>Clear error</Button>
       </div>
@@ -138,7 +144,15 @@ const Webcam = () => {
               <small>Video: {recording.videoLabel}</small>
               <small>Audio: {recording.audioLabel}</small>
             </div>
-            <video ref={recording.webcamRef} loop autoPlay playsInline muted />
+            {!recording.previewRef.current?.src.startsWith("blob:") && (
+              <video
+                ref={recording.webcamRef}
+                loop
+                autoPlay
+                playsInline
+                muted
+              />
+            )}
             <div className="space-x-1 space-y-1 my-2">
               <Button
                 inverted
@@ -232,85 +246,111 @@ const Webcam = () => {
                     console.log(selectedSourceId, selectedTargetId, email);
 
                     // check if everything is selected and the email is valid
-                    if (!selectedSourceId || !selectedTargetId || !email) {
-                      return;
-                    }
+                    // if (!selectedSourceId || !selectedTargetId || !email) {
+                    //   return;
+                    // }
 
                     // if everything is good, then upload the blob
 
                     setLoading(true);
+
+                    // -------------------------------------------
+
                     // Upload the blob to a back-end
-                    const formData = new FormData();
-                    formData.append(
-                      "file",
-                      finalRecording.blob as Blob,
-                      `${email}.webm`
-                    );
+                    // const formData = new FormData();
+                    // formData.append(
+                    //   "original_video",
+                    //   finalRecording.blob as Blob,
+                    //   `${email}.webm`,
+                    // );
+                    // formData.append("user", user?.id);
+                    //
+                    // let res = await pb.collection("dubbing").create(formData);
+                    //
+                    // console.log(res);
+                    //
+                    // // generate a file token
+                    // const fileToken = await pb.files.getToken();
+                    //
+                    // console.log(
+                    //   pb.getFileUrl(res, res["original_video"], {
+                    //     token: fileToken,
+                    //   }),
+                    // );
+                    //
+                    // const records = await pb.collection("dubbing").getFullList({
+                    //   sort: "-created",
+                    //   expand: "user",
+                    // });
+                    //
+                    // console.log(records);
 
-                    formData.append("source", selectedSourceId);
-                    formData.append("target", selectedTargetId);
-                    formData.append("email", email);
+                    // -------------------------------------------
 
-                    const response = await fetch(
-                      "https://camb.gauravgosain.dev/upload",
-                      {
-                        method: "POST",
-                        body: formData,
-                      }
-                    );
-
-                    const respText = await response.text();
-
-                    const temp = await fetch("/api/convert", {
-                      method: "POST",
-                      body: JSON.stringify({
-                        email: email,
-                        source: selectedSourceId,
-                        target: selectedTargetId,
-                      }) as any,
-                    });
-
-                    const tempJson = await temp.json();
-
-                    console.log(tempJson);
-
-                    const task_id = tempJson.task_id;
-
-                    let res;
-
-                    // write a polling loop
-                    while (true) {
-                      const resp = await fetch(`/api/status`, {
-                        method: "POST",
-                        body: JSON.stringify({
-                          task_id: task_id,
-                        }) as any,
-                      });
-                      const respJson = await resp.json();
-                      if (respJson.status === "SUCCESS") {
-                        res = respJson;
-                        break;
-                      }
-                      await new Promise((resolve) => setTimeout(resolve, 1000));
-                      console.log(respJson);
-                    }
-
-                    const resp = await fetch(`/api/final_url`, {
-                      method: "POST",
-                      body: JSON.stringify({
-                        run_id: res.run_id,
-                      }) as any,
-                    });
-                    const respJson = await resp.json();
-
-                    console.log(respJson);
-                    const finalresp = await fetch(`/api/send_email`, {
-                      method: "POST",
-                      body: JSON.stringify({
-                        email: email,
-                        data: JSON.stringify(respJson),
-                      }) as any,
-                    });
+                    // formData.append("source", selectedSourceId);
+                    // formData.append("target", selectedTargetId);
+                    // formData.append("email", email);
+                    //
+                    // const response = await fetch(
+                    //   "https://camb.gauravgosain.dev/upload",
+                    //   {
+                    //     method: "POST",
+                    //     body: formData,
+                    //   },
+                    // );
+                    //
+                    // const respText = await response.text();
+                    //
+                    // const temp = await fetch("/api/convert", {
+                    //   method: "POST",
+                    //   body: JSON.stringify({
+                    //     email: email,
+                    //     source: selectedSourceId,
+                    //     target: selectedTargetId,
+                    //   }) as any,
+                    // });
+                    //
+                    // const tempJson = await temp.json();
+                    //
+                    // console.log(tempJson);
+                    //
+                    // const task_id = tempJson.task_id;
+                    //
+                    // let res;
+                    //
+                    // // write a polling loop
+                    // while (true) {
+                    //   const resp = await fetch(`/api/status`, {
+                    //     method: "POST",
+                    //     body: JSON.stringify({
+                    //       task_id: task_id,
+                    //     }) as any,
+                    //   });
+                    //   const respJson = await resp.json();
+                    //   if (respJson.status === "SUCCESS") {
+                    //     res = respJson;
+                    //     break;
+                    //   }
+                    //   await new Promise((resolve) => setTimeout(resolve, 1000));
+                    //   console.log(respJson);
+                    // }
+                    //
+                    // const resp = await fetch(`/api/final_url`, {
+                    //   method: "POST",
+                    //   body: JSON.stringify({
+                    //     run_id: res.run_id,
+                    //   }) as any,
+                    // });
+                    // const respJson = await resp.json();
+                    //
+                    // console.log(respJson);
+                    // const finalresp = await fetch(`/api/send_email`, {
+                    //   method: "POST",
+                    //   body: JSON.stringify({
+                    //     email: email,
+                    //     data: JSON.stringify(respJson),
+                    //   }) as any,
+                    // });
                     setLoading(false);
                   }}
                 >

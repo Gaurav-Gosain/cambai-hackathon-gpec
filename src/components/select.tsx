@@ -7,12 +7,17 @@ type SelectProps = {
 };
 
 export function Select(props: SelectProps) {
+  const devices = props.items.filter(
+    (value, index, self) =>
+      index === self.findIndex((t) => t.deviceId === value.deviceId),
+  );
+
   return (
     <select
       className="input p2 text-black px-2 rounded-lg ml-2"
       onChange={props.onChange}
     >
-      {props.items.map((item) => {
+      {devices.map((item) => {
         const dataAttr = {
           [`data-${props.dataset}`]: item.deviceId,
         };
