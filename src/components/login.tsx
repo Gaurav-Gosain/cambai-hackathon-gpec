@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/ui/toggle";
-import LoginImage from "@/public/log.svg";
+import LoginImage from "@/public/login.svg";
 import pb from "@/lib/pocketbase";
 import { useRouter } from "next/router";
 
@@ -95,14 +95,12 @@ export default function Login() {
           </div>
         </div>
       </div>
-      <div className="hidden bg-muted lg:block ">
-        <Image src={LoginImage} alt="Login Image" className="h-full w-full" />
-        <footer className="fixed bottom-2 right-2 text-xs text-secondary-foreground">
-          <a href="https://www.freepik.com/free-vector/woman-thinking-healthy-unhealthy-snacks-choice_13146722.htm#query=nutrition%20illustration&position=34&from_view=keyword&track=ais&uuid=ced5002a-f818-4af7-911c-02d7473f881d">
-            Image by pch.vector
-          </a>{" "}
-          on Freepik
-        </footer>
+      <div className="hidden bg-muted h-full lg:flex items-center justify-center">
+        <Image
+          src={LoginImage}
+          alt="Login Image"
+          className="h-auto w-3/4 m-auto"
+        />
       </div>
     </div>
   );
