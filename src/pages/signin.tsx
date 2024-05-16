@@ -5,7 +5,7 @@ const SignIn: NextPage = () => {
   return (
     <>
       <Head>
-        <title>SignIn page</title>
+        <title>Sign In page (CAMB.AI x GPEC)</title>
       </Head>
       <main>
         <Login />

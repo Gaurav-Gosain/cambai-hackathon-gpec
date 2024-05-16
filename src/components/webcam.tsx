@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
 import { useRecordWebcam } from "react-record-webcam";
-import { Button } from "./button";
-import { Select } from "./select";
+import { SelectCustom } from "./select";
 import pb from "@/lib/pocketbase";
 import { AuthModel } from "pocketbase";
+import { Button } from "./ui/button";
+import { useLoadingStore } from "@/lib/stores/loading-store";
 
 const Webcam = ({ user }: { user: AuthModel }) => {
   const {
@@ -31,7 +32,8 @@ const Webcam = ({ user }: { user: AuthModel }) => {
   const [audioDeviceId, setAudioDeviceId] = React.useState<string>("");
   const [finalRecording, setFinalRecording] = React.useState<any>(null);
   const [email, setEmail] = React.useState<string>("");
-  const [loading, setLoading] = React.useState<boolean>(false);
+
+  const { setLoading } = useLoadingStore();
 
   interface Languages {
     id: number;
@@ -45,31 +47,17 @@ const Webcam = ({ user }: { user: AuthModel }) => {
   const [selectedSourceId, setSelectedSourceId] = React.useState<string>("");
   const [selectedTargetId, setSelectedTargetId] = React.useState<string>("");
 
-  useEffect(() => {
-    fetch("/api/source").then(async (res) => {
-      const json = await res.json();
-      setSource(json);
-    });
-
-    fetch("/api/target").then(async (res) => {
-      const json = await res.json();
-      setTarget(json);
-    });
-  }, []);
-
-  const handleSelect = async (event: any) => {
-    clearAllRecordings();
-    const { deviceid: deviceId } =
-      event.target.options[event.target.selectedIndex].dataset;
-    if (devicesById?.[deviceId].type === "videoinput") {
-      setVideoDeviceId(deviceId);
-    }
-    if (devicesById?.[deviceId].type === "audioinput") {
-      setAudioDeviceId(deviceId);
-    }
-    const recording = await createRecording(videoDeviceId, audioDeviceId);
-    if (recording) await openCamera(recording.id);
-  };
+  // useEffect(() => {
+  //   fetch("/api/source").then(async (res) => {
+  //     const json = await res.json();
+  //     setSource(json);
+  //   });
+  //
+  //   fetch("/api/target").then(async (res) => {
+  //     const json = await res.json();
+  //     setTarget(json);
+  //   });
+  // }, []);
 
   const quickDemo = async () => {
     try {
@@ -90,118 +78,117 @@ const Webcam = ({ user }: { user: AuthModel }) => {
     if (recording) await openCamera(recording.id);
   };
 
+  useEffect(() => {
+    if (audioDeviceId && videoDeviceId) start();
+    return () => {
+      clearAllRecordings();
+    };
+  }, [videoDeviceId, audioDeviceId]);
+
   return (
-    <div className="container mx-auto p-4 text-white">
-      {/* make a full screen loading overlay */}
-      {loading && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-75 top-0 left-0 right-0 bottom-0">
-          <div className="flex justify-center items-center h-full">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-4 border-white"></div>
-          </div>
-        </div>
-      )}
-      <h1 className="text-3xl font-bold">React Record Webcam demo</h1>
-      <input
-        type="email"
-        placeholder="Enter email here"
-        className="text-xl rounded-xl text-black p-2"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      ></input>
-      <div className="space-y-2 my-4">
-        <div className="flex">
-          <h4>Select video input</h4>
-          <Select
+    <div className="flex w-screen h-[calc(100vh-56px)] flex-col items-center justify-center gap-4">
+      {!finalRecording && activeRecordings.length == 0 && (
+        <div className="flex flex-col md:flex-row gap-x-8 gap-y-4">
+          <SelectCustom
             items={devicesByType?.video || []}
             dataset="deviceid"
-            onChange={handleSelect}
+            placeholder="Select a camera"
+            onChange={(deviceID: string) => setVideoDeviceId(deviceID)}
           />
-        </div>
-        <div className="flex">
-          <h4>Select audio input</h4>
-          <Select
+          <SelectCustom
             items={devicesByType?.audio || []}
             dataset="deviceid"
-            onChange={handleSelect}
+            placeholder="Select a mic"
+            onChange={(deviceID: string) => setAudioDeviceId(deviceID)}
           />
         </div>
-      </div>
-      <div className="space-x-2">
-        <Button onClick={quickDemo}>Record 30s video</Button>
-        {activeRecordings.length == 0 && (
-          <Button onClick={start}>Open camera</Button>
-        )}
-        <Button onClick={() => clearAllRecordings()}>Clear all</Button>
-        <Button onClick={() => clearError()}>Clear error</Button>
-      </div>
-      <div className="my-2">
-        <p>{errorMessage ? `Error: ${errorMessage}` : ""}</p>
-      </div>
+      )}
+
+      {activeRecordings.length == 0 && videoDeviceId && audioDeviceId && (
+        <Button onClick={start}>Open camera</Button>
+      )}
+
+      {/* <div className="space-x-2"> */}
+      {/*   <Button onClick={quickDemo}>Record 30s video</Button> */}
+      {/*   {activeRecordings.length == 0 && ( */}
+      {/*     <Button onClick={start}>Open camera</Button> */}
+      {/*   )} */}
+      {/*   <Button onClick={() => clearAllRecordings()}>Clear all</Button> */}
+      {/*   <Button onClick={() => clearError()}>Clear error</Button> */}
+      {/* </div> */}
+      {/* <div className="my-2"> */}
+      {/*   <p>{errorMessage ? `Error: ${errorMessage}` : ""}</p> */}
+      {/* </div> */}
       <div className="grid grid-cols-custom gap-4 my-4">
         {activeRecordings?.map((recording) => (
-          <div className="bg-white rounded-lg px-4 py-4" key={recording.id}>
-            <div className="text-black grid grid-cols-1">
-              <p>Live</p>
-              <small>Status: {recording.status}</small>
-              <small>Video: {recording.videoLabel}</small>
-              <small>Audio: {recording.audioLabel}</small>
-            </div>
-            {!recording.previewRef.current?.src.startsWith("blob:") && (
-              <video
-                ref={recording.webcamRef}
-                loop
-                autoPlay
-                playsInline
-                muted
-              />
+          <div className="rounded-lg px-4 py-4" key={recording.id}>
+            {/* <div className="grid grid-cols-1"> */}
+            {/*   <p>Live</p> */}
+            {/*   <small>Status: {recording.status}</small> */}
+            {/*   <small>Video: {recording.videoLabel}</small> */}
+            {/*   <small>Audio: {recording.audioLabel}</small> */}
+            {/* </div> */}
+            {!finalRecording && (
+              <div className="relative">
+                {recording.status === "RECORDING" && (
+                  <div className="absolute top-4 right-4 flex items-center gap-2 justify-center">
+                    <div className="h-5 w-5 rounded-full bg-red-500 animate-pulse" />
+                    <span className="text-md font-medium">Recording</span>
+                  </div>
+                )}
+                <video
+                  ref={recording.webcamRef}
+                  className="rounded-xl"
+                  loop
+                  autoPlay
+                  playsInline
+                  muted
+                />
+                <div className="space-x-1 space-y-1 my-2">
+                  <Button
+                    disabled={
+                      recording.status === "RECORDING" ||
+                      recording.status === "PAUSED"
+                    }
+                    onClick={() => startRecording(recording.id)}
+                  >
+                    Record
+                  </Button>
+                  <Button
+                    disabled={
+                      recording.status !== "RECORDING" &&
+                      recording.status !== "PAUSED"
+                    }
+                    // toggled={recording.status === "PAUSED"}
+                    onClick={() =>
+                      recording.status === "PAUSED"
+                        ? resumeRecording(recording.id)
+                        : pauseRecording(recording.id)
+                    }
+                  >
+                    {recording.status === "PAUSED" ? "Resume" : "Pause"}
+                  </Button>
+                  <Button
+                    // toggled={recording.isMuted}
+                    onClick={() => muteRecording(recording.id)}
+                  >
+                    Mute
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      const res = await stopRecording(recording.id);
+                      setFinalRecording(res);
+                      console.log(res);
+                    }}
+                  >
+                    Stop
+                  </Button>
+                  <Button onClick={() => cancelRecording(recording.id)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
             )}
-            <div className="space-x-1 space-y-1 my-2">
-              <Button
-                inverted
-                disabled={
-                  recording.status === "RECORDING" ||
-                  recording.status === "PAUSED"
-                }
-                onClick={() => startRecording(recording.id)}
-              >
-                Record
-              </Button>
-              <Button
-                inverted
-                disabled={
-                  recording.status !== "RECORDING" &&
-                  recording.status !== "PAUSED"
-                }
-                toggled={recording.status === "PAUSED"}
-                onClick={() =>
-                  recording.status === "PAUSED"
-                    ? resumeRecording(recording.id)
-                    : pauseRecording(recording.id)
-                }
-              >
-                {recording.status === "PAUSED" ? "Resume" : "Pause"}
-              </Button>
-              <Button
-                inverted
-                toggled={recording.isMuted}
-                onClick={() => muteRecording(recording.id)}
-              >
-                Mute
-              </Button>
-              <Button
-                inverted
-                onClick={async () => {
-                  const res = await stopRecording(recording.id);
-                  setFinalRecording(res);
-                  console.log(res);
-                }}
-              >
-                Stop
-              </Button>
-              <Button inverted onClick={() => cancelRecording(recording.id)}>
-                Cancel
-              </Button>
-            </div>
 
             <div
               className={`${
@@ -243,7 +230,6 @@ const Webcam = ({ user }: { user: AuthModel }) => {
                 </div>
 
                 <Button
-                  inverted
                   onClick={async () => {
                     console.log(selectedSourceId, selectedTargetId, email);
 
@@ -254,38 +240,38 @@ const Webcam = ({ user }: { user: AuthModel }) => {
 
                     // if everything is good, then upload the blob
 
-                    // setLoading(true);
+                    setLoading(true);
 
                     // -------------------------------------------
 
-                    // Upload the blob to a back-end
-                    const formData = new FormData();
-                    formData.append(
-                      "original_video",
-                      finalRecording.blob as Blob,
-                      `${email}.webm`,
-                    );
-                    formData.append("user", user?.id);
-
-                    let res = await pb.collection("dubbing").create(formData);
-
-                    console.log(res);
-
-                    // generate a file token
-                    const fileToken = await pb.files.getToken();
-
-                    console.log(
-                      pb.getFileUrl(res, res["original_video"], {
-                        token: fileToken,
-                      }),
-                    );
-
-                    const records = await pb.collection("dubbing").getFullList({
-                      sort: "-created",
-                      expand: "user",
-                    });
-
-                    console.log(records);
+                    // // Upload the blob to a back-end
+                    // const formData = new FormData();
+                    // formData.append(
+                    //   "original_video",
+                    //   finalRecording.blob as Blob,
+                    //   `${email}.webm`,
+                    // );
+                    // formData.append("user", user?.id);
+                    //
+                    // let res = await pb.collection("dubbing").create(formData);
+                    //
+                    // console.log(res);
+                    //
+                    // // generate a file token
+                    // const fileToken = await pb.files.getToken();
+                    //
+                    // console.log(
+                    //   pb.getFileUrl(res, res["original_video"], {
+                    //     token: fileToken,
+                    //   }),
+                    // );
+                    //
+                    // const records = await pb.collection("dubbing").getFullList({
+                    //   sort: "-created",
+                    //   expand: "user",
+                    // });
+                    //
+                    // console.log(records);
 
                     // -------------------------------------------
 
@@ -358,7 +344,13 @@ const Webcam = ({ user }: { user: AuthModel }) => {
                 >
                   Dub from x to y
                 </Button>
-                <Button inverted onClick={() => clearPreview(recording.id)}>
+                <Button
+                  onClick={() => {
+                    clearPreview(recording.id);
+                    clearAllRecordings();
+                    setFinalRecording(null);
+                  }}
+                >
                   Clear preview
                 </Button>
               </div>
