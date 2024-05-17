@@ -90,7 +90,7 @@ export default function Login() {
               className="underline px-1"
               onClick={signIn}
             >
-              Still log in lol
+              Sign Up
             </Button>
           </div>
         </div>
