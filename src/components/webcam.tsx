@@ -252,14 +252,14 @@ const Webcam = ({ user }: { user: AuthModel }) => {
                 bg-slate-900/80 w-3/4"
               >
                 <div className="space-x-2 my-2 flex flex-col justify-center items-center md:flex-row">
-                  <div>Dub from </div>
+                  <div className="text-white">Dub from </div>
                   <LanguageSelect
                     languages={source}
                     selectedLanguage={selectedSourceId}
                     setSelectedLanguage={setSelectedSourceId}
                     placeholder={"Source language"}
                   />
-                  <div> to </div>
+                  <div className="text-white"> to </div>
                   <LanguageSelect
                     languages={target}
                     selectedLanguage={selectedTargetId}
