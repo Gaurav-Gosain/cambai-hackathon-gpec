@@ -233,7 +233,7 @@ const Webcam = ({ user }: { user: AuthModel }) => {
               <div
                 className="absolute top-4 left-4 flex \
                 items-center gap-2 justify-center p-4 rounded-xl \
-                bg-slate-900/80 font-bold text-2xl"
+                bg-slate-900/80 text-white font-bold text-2xl"
               >
                 Preview
               </div>
@@ -249,7 +249,7 @@ const Webcam = ({ user }: { user: AuthModel }) => {
               <div
                 className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col  \
                 items-center gap-2 justify-center p-4 rounded-xl \
-                bg-slate-900/80 text-white w-3/4"
+                bg-slate-900/80 w-3/4"
               >
                 <div className="space-x-2 my-2 flex flex-col justify-center items-center md:flex-row">
                   <div>Dub from </div>
