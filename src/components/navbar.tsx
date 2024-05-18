@@ -19,12 +19,9 @@ const Navbar = () => {
 
   return (
     <div className="flex gap-4 px-4 py-2 justify-between items-center bg-primary-foreground sticky top-0 z-[999]">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2" onClick={() => router.push("/")}>
         <WebcamIcon />
-        <span
-          className="font-bold hidden sm:block cursor-pointer"
-          onClick={() => router.push("/")}
-        >
+        <span className="font-bold hidden sm:block cursor-pointer">
           CAMB.AI x GPEC
         </span>
       </div>
