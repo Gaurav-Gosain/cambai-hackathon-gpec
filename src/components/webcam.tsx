@@ -139,6 +139,15 @@ const Webcam = ({ user }: { user: AuthModel }) => {
             {/* </div> */}
             {!finalRecording && (
               <div className="relative">
+                <video
+                  ref={recording.webcamRef}
+                  className="rounded-xl"
+                  loop
+                  autoPlay
+                  playsInline
+                  muted
+                />
+
                 {recording.status === "RECORDING" && (
                   <div className="absolute top-4 right-4 flex items-center gap-2 justify-center">
                     <div className="h-5 w-5 rounded-full bg-red-500 animate-pulse" />
@@ -151,7 +160,7 @@ const Webcam = ({ user }: { user: AuthModel }) => {
                     <span className="text-md font-medium">Paused</span>
                   </div>
                 )}
-                <div className="absolute top-4 left-4 flex items-center gap-2 justify-center">
+                <div className="absolute z-50 top-4 left-4 flex items-center gap-2 justify-center">
                   <Button
                     variant={"secondary"}
                     onClick={() => stop(recording.id)}
@@ -211,14 +220,6 @@ const Webcam = ({ user }: { user: AuthModel }) => {
                     </div>
                   )}
                 </div>
-                <video
-                  ref={recording.webcamRef}
-                  className="rounded-xl"
-                  loop
-                  autoPlay
-                  playsInline
-                  muted
-                />
               </div>
             )}
 
