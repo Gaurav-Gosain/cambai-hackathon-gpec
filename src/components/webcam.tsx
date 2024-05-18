@@ -233,7 +233,7 @@ const Webcam = ({ user }: { user: AuthModel }) => {
               <div
                 className="absolute top-4 left-4 flex \
                 items-center gap-2 justify-center p-4 rounded-xl \
-                bg-slate-900/80 text-white font-bold text-2xl"
+                bg-slate-900/80 font-bold text-2xl"
               >
                 Preview
               </div>
