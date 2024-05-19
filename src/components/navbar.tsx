@@ -12,6 +12,8 @@ import { Button } from "./ui/button";
 import { ModeToggle } from "./ui/toggle";
 import { useAuthStore } from "@/lib/stores/user-store";
 import { useRouter } from "next/router";
+import Image from "next/image";
+import CambLogo from "@/public/camb.svg";
 
 const Navbar = () => {
   const { signOut, user } = useAuthStore();
@@ -19,11 +21,14 @@ const Navbar = () => {
 
   return (
     <div className="flex gap-4 px-4 py-2 justify-between items-center bg-primary-foreground sticky top-0 z-[999]">
-      <div className="flex items-center gap-2" onClick={() => router.push("/")}>
-        <WebcamIcon />
-        <span className="font-bold hidden sm:block cursor-pointer">
-          CAMB.AI x GPEC
-        </span>
+      <div className="flex items-center gap-2 cursor-pointer" onClick={() => router.push("/")}>
+        <Image
+          src={CambLogo}
+          alt="Login Image"
+          height={75}
+          width={125}
+          className="my-auto"
+        />
       </div>
       <div className="flex items-center gap-4 ">
         <DropdownMenu>
@@ -52,7 +57,7 @@ const Navbar = () => {
             <DropdownMenuItem onClick={signOut}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <ModeToggle />
+        {/* <ModeToggle /> */}
       </div>
     </div>
   );

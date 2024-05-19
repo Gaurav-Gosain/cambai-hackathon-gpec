@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/ui/toggle";
 import LoginImage from "@/public/login.svg";
+import CambLogo from "@/public/camb.svg";
 import pb from "@/lib/pocketbase";
 import { useRouter } from "next/router";
 
@@ -44,22 +45,22 @@ export default function Login() {
   };
 
   return (
-    <div className="w-full h-screen lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
-      <div className="fixed top-4 right-4 z-10">
-        <ModeToggle />
+    <div className="w-full h-screen lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">     
+      <div className="hidden bg-muted h-full lg:flex items-center justify-center">
+        <Image
+          src={CambLogo}
+          alt="Login Image"
+          className="h-auto w-3/4 m-auto"
+        />
       </div>
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-[350px] gap-6">
           <div className="grid gap-2 text-center">
-            <h1 className="text-3xl font-bold">Login</h1>
-            <p className="text-balance text-muted-foreground">
-              Click the button below to login!
-            </p>
           </div>
           <div className="grid gap-4">
             <Button
               variant="outline"
-              className="w-full flex justify-center items-center gap-2"
+              className="w-full flex justify-center items-center gap-2 py-8"
               onClick={signIn}
             >
               <svg className="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24">
@@ -83,24 +84,7 @@ export default function Login() {
               <span className="text-lg">Login with Google</span>
             </Button>
           </div>
-          <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Button
-              variant={"link"}
-              className="underline px-1"
-              onClick={signIn}
-            >
-              Sign Up
-            </Button>
-          </div>
         </div>
-      </div>
-      <div className="hidden bg-muted h-full lg:flex items-center justify-center">
-        <Image
-          src={LoginImage}
-          alt="Login Image"
-          className="h-auto w-3/4 m-auto"
-        />
       </div>
     </div>
   );
