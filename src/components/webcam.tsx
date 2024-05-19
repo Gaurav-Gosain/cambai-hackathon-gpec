@@ -2,7 +2,7 @@ import React, { Fragment, useEffect } from "react";
 import { useRecordWebcam } from "react-record-webcam";
 import { SelectCustom } from "./select";
 import pb from "@/lib/pocketbase";
-import { AuthModel } from "pocketbase";
+import { AuthModel, ClientResponseError } from "pocketbase";
 import { Button } from "./ui/button";
 import { useLoadingStore } from "@/lib/stores/loading-store";
 import {
@@ -289,11 +289,24 @@ const Webcam = ({ user }: { user: AuthModel }) => {
                       formData.append("target_id", `${selectedTargetId?.id}`);
                       formData.append("status", "STARTED");
 
-                      let res = await pb.collection("dubbing").create(formData);
+                      try {
+                        let res = await pb
+                          .collection("dubbing")
+                          .create(formData);
+                        setLoading(false);
+                        router.push(`/dubbing/${res.id}`);
+                      } catch (err) {
+                        // video limit is 40242880 bytes so might hit errors here
+                        const customErr = err as ClientResponseError;
+                        toast({
+                          variant: "destructive",
+                          title: "Uh oh! Something went wrong.",
+                          description:
+                            customErr.data.data.original_video.message,
+                        });
 
-                      console.log(res);
-                      setLoading(false);
-                      router.push(`/dubbing/${res.id}`);
+                        setLoading(false);
+                      }
                     }}
                   >
                     Done
