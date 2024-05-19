@@ -25,20 +25,19 @@ export default function DubbingRoute() {
   return (
     <div
       className={cn(
-        `w-screen h-[calc(100vh-56px)] flex items-center justify-center text-center`,
-        status && "-mt-12",
+        `w-screen h-[calc(100vh-56px)] flex flex-col items-center justify-center text-center`,
       )}
     >
+      <div className="loader !m-0 !my-16"></div>
       {status && (
-        <div className="absolute mt-24 md:text-3xl font-bold top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center gap-2">
+        <div className="md:text-3xl font-bold flex flex-col items-center justify-center gap-2 mx-16">
           <h3 className="text-sm text-muted-foreground">Dubbing Status</h3>
           <h1>{status}</h1>
-          {/* <h4 className="text-xs text-muted"> */}
-          {/*   The above status will automatically update, check back in a bit */}
-          {/* </h4> */}
+          <h4 className="text-xs text-muted-foreground ">
+            The above status will automatically update...
+          </h4>
         </div>
       )}
-      <div className="loader"></div>
     </div>
   );
 }

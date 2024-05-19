@@ -81,6 +81,11 @@ const Webcam = ({ user }: { user: AuthModel }) => {
     });
   }, [errorMessage]);
 
+  useEffect(() => {
+    setVideoDeviceId(devicesByType?.video[0].deviceId ?? null);
+    setAudioDeviceId(devicesByType?.audio[0].deviceId ?? null);
+  }, [devicesByType]);
+
   const start = async () => {
     if (videoDeviceId === null || audioDeviceId === null) return;
     setLoading(true);
@@ -205,7 +210,7 @@ const Webcam = ({ user }: { user: AuthModel }) => {
                         onClick={async () => {
                           const res = await stopRecording(recording.id);
                           setFinalRecording(res);
-                          console.log(res);
+                          closeCamera(recording.id);
                         }}
                       >
                         <CircleStop className="w-8 h-8" />
@@ -271,8 +276,6 @@ const Webcam = ({ user }: { user: AuthModel }) => {
                 {selectedSourceId && selectedTargetId && (
                   <Button
                     onClick={async () => {
-                      console.log(selectedSourceId, selectedTargetId);
-
                       setLoading(true);
 
                       // -------------------------------------------

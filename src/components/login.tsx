@@ -20,7 +20,6 @@ export default function Login() {
         provider: "google",
       })
       .then(async (response) => {
-        console.log(response);
         const user = await pb.collection("users").getOne(response.record.id);
         if (
           user.name &&
@@ -45,7 +44,7 @@ export default function Login() {
   };
 
   return (
-    <div className="w-full h-screen lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">     
+    <div className="w-full h-screen lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
       <div className="hidden bg-muted h-full lg:flex items-center justify-center">
         <Image
           src={CambLogo}
@@ -55,8 +54,7 @@ export default function Login() {
       </div>
       <div className="flex items-center justify-center py-12">
         <div className="mx-auto grid w-[350px] gap-6">
-          <div className="grid gap-2 text-center">
-          </div>
+          <div className="grid gap-2 text-center"></div>
           <div className="grid gap-4">
             <Button
               variant="outline"
