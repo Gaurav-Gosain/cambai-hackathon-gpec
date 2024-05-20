@@ -209,6 +209,7 @@ const Webcam = ({ user }: { user: AuthModel }) => {
                         className="p-4 bg-red-400 rounded-full"
                         onClick={async () => {
                           const res = await stopRecording(recording.id);
+                          console.log(res);
                           setFinalRecording(res);
                           closeCamera(recording.id);
                         }}
@@ -278,6 +279,10 @@ const Webcam = ({ user }: { user: AuthModel }) => {
                     onClick={async () => {
                       setLoading(true);
 
+                      const isSafari = /^((?!chrome|android).)*safari/i.test(
+                        navigator.userAgent,
+                      );
+
                       // -------------------------------------------
 
                       // Upload the blob to a back-end
@@ -285,7 +290,7 @@ const Webcam = ({ user }: { user: AuthModel }) => {
                       formData.append(
                         "original_video",
                         finalRecording.blob as Blob,
-                        `original_video.webm`,
+                        isSafari ? "original_video.mp4" : "original_video.webm",
                       );
                       formData.append("user", user?.id);
                       formData.append("source_id", `${selectedSourceId?.id}`);
