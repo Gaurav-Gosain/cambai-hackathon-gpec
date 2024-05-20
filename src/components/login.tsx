@@ -6,6 +6,7 @@ import LoginImage from "@/public/login.svg";
 import CambLogo from "@/public/camb.svg";
 import pb from "@/lib/pocketbase";
 import { useRouter } from "next/router";
+import { MouseEventHandler } from "react";
 
 export default function Login() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function Login() {
     router.push("/");
   };
 
-  const signIn = async (e: Event) => {
+  const signIn = async (e: MouseEventHandler<HTMLButtonElement>) => {
     e.preventDefault();
 
     pb.collection("users")
