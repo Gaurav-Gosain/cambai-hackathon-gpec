@@ -15,8 +15,6 @@ export default function Login() {
     router.push("/");
   };
 
-  const w = window.open();
-
   const signIn = async (e: any, w: any) => {
     e.preventDefault();
 
