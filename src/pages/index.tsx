@@ -17,7 +17,7 @@ const Home: NextPage = () => {
         <title>CAMB.AI x GPEC</title>
       </Head>
 
-      <Webcam user={user} />
+      <Webcam demo={false} user={user} />
     </>
   );
 };
