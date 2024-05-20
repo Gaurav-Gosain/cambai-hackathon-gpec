@@ -15,7 +15,7 @@ export default function Login() {
     router.push("/");
   };
 
-  const signIn = async (e: MouseEventHandler<HTMLButtonElement>) => {
+  const signIn = async (e: any) => {
     e.preventDefault();
 
     pb.collection("users")
