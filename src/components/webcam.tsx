@@ -210,7 +210,7 @@ const Webcam = ({ user }: { user: AuthModel }) => {
                         onClick={async () => {
                           const res = await stopRecording(recording.id);
                           setFinalRecording(res);
-                          closeCamera(recording.id);
+                          // closeCamera(recording.id);
                         }}
                       >
                         <CircleStop className="w-8 h-8" />
