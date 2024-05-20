@@ -7,7 +7,6 @@ import { Button } from "./ui/button";
 import { useLoadingStore } from "@/lib/stores/loading-store";
 import {
   CircleStop,
-  CrossIcon,
   MicIcon,
   MicOffIcon,
   Pause,
@@ -19,19 +18,26 @@ import { cn } from "@/lib/utils";
 import { Languages } from "@/lib/shared-types";
 import { LanguageSelect } from "./language-select";
 import { toast } from "./ui/use-toast";
-import { ToastAction } from "./ui/toast";
 import { useRouter } from "next/router";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-const Webcam = ({ user }: { user: AuthModel }) => {
+const Webcam = ({ user, demo = false }: { user: AuthModel; demo: boolean }) => {
   const {
     activeRecordings,
-    cancelRecording,
     clearAllRecordings,
-    clearError,
     clearPreview,
     closeCamera,
     createRecording,
-    devicesById,
     devicesByType,
     errorMessage,
     muteRecording,
@@ -54,6 +60,9 @@ const Webcam = ({ user }: { user: AuthModel }) => {
 
   const [source, setSource] = React.useState<Languages[]>([]);
   const [target, setTarget] = React.useState<Languages[]>([]);
+
+  const [name, setName] = React.useState<string>("");
+  const [email, setEmail] = React.useState<string>("");
 
   const [selectedSourceId, setSelectedSourceId] =
     React.useState<Languages | null>(null);
@@ -110,6 +119,49 @@ const Webcam = ({ user }: { user: AuthModel }) => {
     };
   }, [videoDeviceId, audioDeviceId]);
 
+  const startDubbing = async () => {
+    setLoading(true);
+
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+    // -------------------------------------------
+
+    // Upload the blob to a back-end
+    const formData = new FormData();
+    formData.append(
+      "original_video",
+      finalRecording.blob as Blob,
+      isSafari ? "original_video.mp4" : "original_video.webm",
+    );
+    formData.append("user", user?.id);
+    if (demo) {
+      formData.append("name", name);
+      formData.append("email", email);
+    } else {
+      formData.append("name", user?.name);
+      formData.append("email", user?.email);
+    }
+    formData.append("source_id", `${selectedSourceId?.id}`);
+    formData.append("target_id", `${selectedTargetId?.id}`);
+    formData.append("status", "STARTED");
+
+    try {
+      let res = await pb.collection("dubbing").create(formData);
+      setLoading(false);
+      router.push(`/dubbing/${res.id}`);
+    } catch (err) {
+      // video limit is 40242880 bytes so might hit errors here
+      const customErr = err as ClientResponseError;
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: customErr.data.data.original_video.message,
+      });
+
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex w-screen h-[calc(100vh-56px)] flex-col items-center justify-center gap-4">
       {!finalRecording && activeRecordings.length == 0 && (
@@ -136,12 +188,6 @@ const Webcam = ({ user }: { user: AuthModel }) => {
       <div className="grid grid-cols-custom gap-4 my-4">
         {activeRecordings?.map((recording) => (
           <div className="rounded-lg px-4 py-4" key={recording.id}>
-            {/* <div className="grid grid-cols-1"> */}
-            {/*   <p>Live</p> */}
-            {/*   <small>Status: {recording.status}</small> */}
-            {/*   <small>Video: {recording.videoLabel}</small> */}
-            {/*   <small>Audio: {recording.audioLabel}</small> */}
-            {/* </div> */}
             {!finalRecording && (
               <div className="relative">
                 <video
@@ -273,52 +319,69 @@ const Webcam = ({ user }: { user: AuthModel }) => {
                     placeholder={"Target language"}
                   />
                 </div>
-
-                {selectedSourceId && selectedTargetId && (
-                  <Button
-                    onClick={async () => {
-                      setLoading(true);
-
-                      const isSafari = /^((?!chrome|android).)*safari/i.test(
-                        navigator.userAgent,
-                      );
-
-                      // -------------------------------------------
-
-                      // Upload the blob to a back-end
-                      const formData = new FormData();
-                      formData.append(
-                        "original_video",
-                        finalRecording.blob as Blob,
-                        isSafari ? "original_video.mp4" : "original_video.webm",
-                      );
-                      formData.append("user", user?.id);
-                      formData.append("source_id", `${selectedSourceId?.id}`);
-                      formData.append("target_id", `${selectedTargetId?.id}`);
-                      formData.append("status", "STARTED");
-
-                      try {
-                        let res = await pb
-                          .collection("dubbing")
-                          .create(formData);
-                        setLoading(false);
-                        router.push(`/dubbing/${res.id}`);
-                      } catch (err) {
-                        // video limit is 40242880 bytes so might hit errors here
-                        const customErr = err as ClientResponseError;
-                        toast({
-                          variant: "destructive",
-                          title: "Uh oh! Something went wrong.",
-                          description:
-                            customErr.data.data.original_video.message,
-                        });
-
-                        setLoading(false);
-                      }
-                    }}
-                  >
-                    Done
-                  </Button>
+                {selectedSourceId && selectedTargetId && !demo && (
+                  <Button onClick={startDubbing}>Start dubbing</Button>
+                )}
+                {selectedSourceId && selectedTargetId && demo && (
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button>Continue</Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Hi there 👋</DialogTitle>
+                        <DialogDescription>
+                          Please enter your details here. Click start dubbing
+                          when you're done.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="name" className="text-right">
+                            Name
+                          </Label>
+                          <Input
+                            id="name"
+                            value={name}
+                            type={"text"}
+                            onChange={(e) => setName(e.target.value)}
+                            className="col-span-3"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="email" className="text-right">
+                            Email
+                          </Label>
+                          <Input
+                            id="email"
+                            value={email}
+                            type={"email"}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="col-span-3"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button
+                          type="submit"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (!name || !email) {
+                              toast({
+                                variant: "destructive",
+                                title: "Uh oh! Something went wrong.",
+                                description: "Please enter a name and email!",
+                              });
+                              return;
+                            }
+                            startDubbing();
+                          }}
+                        >
+                          Start dubbing
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 )}
               </div>
             </div>
