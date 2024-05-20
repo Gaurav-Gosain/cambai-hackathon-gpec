@@ -21,6 +21,9 @@ export default function Login() {
     pb.collection("users")
       .authWithOAuth2({
         provider: "google",
+        urlCallback: (url) => {
+          window.location.href = url;
+        },
       })
       .then(async (response) => {
         const user = await pb.collection("users").getOne(response.record.id);
