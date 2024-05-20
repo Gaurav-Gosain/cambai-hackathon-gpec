@@ -14,7 +14,9 @@ export default function Login() {
     router.push("/");
   };
 
-  const signIn = async () => {
+  const signIn = async (e: Event) => {
+    e.preventDefault();
+
     pb.collection("users")
       .authWithOAuth2({
         provider: "google",
