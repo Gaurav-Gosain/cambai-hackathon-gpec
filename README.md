@@ -2,7 +2,7 @@
 
 ![System architecture](assets/architecture.svg)
 
-> ![NOTE]
+> [!NOTE]
 > This repository is the frontend of the project.
 > The backend is implemented in go using pocketbase as a framework and extending it. [Link to Backend](https://github.com/Gaurav-Gosain/cambai-gpec-backend)
 
@@ -18,5 +18,5 @@
 - Install the dependencies using `bun install` or the equivalent command of the package manager of choice.
 - Run the frontend using `bun run dev` or the equivalent command of the package manager of choice.
 
-> ![WARNING]
+> [!WARNING]
 > Docs for setting up the [backend](https://github.com/Gaurav-Gosain/cambai-gpec-backend) are WIP ⚠️
