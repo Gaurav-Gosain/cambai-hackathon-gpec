@@ -15,14 +15,16 @@ export default function Login() {
     router.push("/");
   };
 
-  const signIn = async (e: any) => {
+  const w = window.open();
+
+  const signIn = async (e: any, w: any) => {
     e.preventDefault();
 
     pb.collection("users")
       .authWithOAuth2({
         provider: "google",
         urlCallback: (url) => {
-          window.location.href = url;
+          w.location.href = url as any;
         },
       })
       .then(async (response) => {
@@ -65,7 +67,7 @@ export default function Login() {
             <Button
               variant="outline"
               className="w-full flex justify-center items-center gap-2 py-8"
-              onClick={signIn}
+              onClick={(e) => signIn(e, window.open())}
             >
               <svg className="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24">
                 <path
